@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2017 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2018 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,25 +31,30 @@
 #
 ############################################################################
 
-px4_add_library(flight_tasks
-	tasks/FlightTask.cpp
-	tasks/SubscriptionArray.cpp
-	FlightTasks.cpp
-)
+# px4_add_library(flight_tasks
+# tasks/FlightTask.cpp
+# 		tasks/FlightTaskManual.cpp
+# 		tasks/FlightTaskManualStabilized.cpp
+# 		tasks/FlightTaskOrbit.cpp
+# 		tasks/FlightTaskManualAltitude.cpp
+# 		tasks/FlightTaskManualAltitudeSmooth.cpp
+# 		tasks/FlightTaskManualPosition.cpp
+# 		tasks/FlightTaskManualPositionSmooth.cpp
+# 		tasks/FlightTaskAuto.cpp
+# 		tasks/FlightTaskAutoLine.cpp
+# 		tasks/FlightTaskAutoFollowMe.cpp
+# 		tasks/FlightTaskOffboard.cpp
+# 		tasks/Utility/ManualSmoothingZ.cpp
+# 		tasks/Utility/ManualSmoothingXY.cpp
+# 		tasks/Utility/StraightLine.cpp
+# 		SubscriptionArray.cpp
+# 		FlightTasks.cpp
+# )
 
-target_link_libraries(flight_tasks PUBLIC
-	flight_tasks_manual
-	flight_tasks_manual_altitude
-	flight_tasks_manual_altitude_smooth
-	flight_tasks_manual_stabilized
-	flight_tasks_manual_position
-	flight_tasks_manual_position_smooth
-	flight_tasks_auto
-	flight_tasks_auto_line
-	flight_tasks_auto_follow_me
-	flight_tasks_offboard
-	flight_tasks_orbit
-	flight_tasks_utility
+px4_add_library(flight_tasks_utility
+    ../FlightTask.cpp
+    ../SubscriptionArray.cpp
+	ManualSmoothingZ.cpp
+	ManualSmoothingXY.cpp
+	StraightLine.cpp
 )
-
-add_subdirectory(tasks)
