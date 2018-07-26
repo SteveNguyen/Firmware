@@ -614,7 +614,7 @@ public:
 			float pitch_scale,
 			float yaw_scale,
 			float idle_speed);
-	~MultirotorMixer();
+	virtual ~MultirotorMixer();
 
 	/**
 	 * Factory method.
@@ -702,6 +702,7 @@ private:
 
 	unsigned			_rotor_count;
 	const Rotor			*_rotors;
+    friend class MultirotorMixerWithDynamicGeometry;
 
 	float 				*_outputs_prev = nullptr;
 
@@ -709,6 +710,79 @@ private:
 	MultirotorMixer(const MultirotorMixer &);
 	MultirotorMixer operator=(const MultirotorMixer &);
 };
+
+/**
+ * Multi-rotor mixer for pre-defined vehicle geometries.
+ *
+ * Collects four inputs (roll, pitch, yaw, thrust) and mixes them to
+ * a set of outputs based on the configured geometry.
+ */
+class __EXPORT MultirotorMixerWithDynamicGeometry : public Mixer
+{
+public:
+
+	/**
+	 * Constructor.
+	 *
+	 * @param control_cb		Callback invoked to read inputs.
+	 * @param cb_handle		Passed to control_cb.
+	 * @param geometry		The selected geometry.
+	 * @param roll_scale		Scaling factor applied to roll inputs
+	 *				compared to thrust.
+	 * @param pitch_scale		Scaling factor applied to pitch inputs
+	 *				compared to thrust.
+	 * @param yaw_wcale		Scaling factor applied to yaw inputs compared
+	 *				to thrust.
+	 * @param idle_speed		Minimum rotor control output value; usually
+	 *				tuned to ensure that rotors never stall at the
+	 * 				low end of their control range.
+	 */
+	MultirotorMixerWithDynamicGeometry(
+            ControlCallback control_cb,
+			uintptr_t cb_handle,
+			MultirotorGeometry geometry,
+			float roll_scale,
+			float pitch_scale,
+			float yaw_scale,
+			float idle_speed
+    );
+	MultirotorMixerWithDynamicGeometry(
+        Mixer::ControlCallback control_cb, uintptr_t cb_handle, 
+        const char *buf, unsigned &buflen
+    );
+
+    void update_parameters();
+
+	virtual ~MultirotorMixerWithDynamicGeometry();
+
+	static MultirotorMixerWithDynamicGeometry *from_text(
+        Mixer::ControlCallback control_cb, uintptr_t cb_handle, 
+        const char *buf, unsigned &buflen
+    );
+
+	virtual unsigned mix(float *outputs, unsigned space);
+	virtual uint16_t get_saturation_status(void);
+	virtual void groups_required(uint32_t &groups);
+	virtual void set_max_delta_out_once(float delta_out_max);
+	virtual unsigned set_trim(float trim);
+	virtual unsigned get_trim(float *trim);
+	virtual void set_thrust_factor(float val);
+	virtual void set_airmode(bool airmode);
+
+private:
+    MultirotorMixer* multirotor_mixer;
+    struct MultirotorMixer::Rotor _rotors[4];
+
+	/* do not allow to copy due to ptr data members */
+	MultirotorMixerWithDynamicGeometry(const MultirotorMixerWithDynamicGeometry &);
+	MultirotorMixerWithDynamicGeometry operator=(const MultirotorMixerWithDynamicGeometry &);
+
+	int quad_flot_df{-1};
+};
+
+
+
+
 
 /** helicopter swash servo mixer */
 struct mixer_heli_servo_s {

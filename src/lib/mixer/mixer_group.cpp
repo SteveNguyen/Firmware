@@ -51,6 +51,14 @@
 #include <math.h>
 #include <unistd.h>
 
+
+#include <px4_log.h>
+#include <px4_config.h>
+#include <px4_tasks.h>
+#include <px4_posix.h>
+#include <uORB/uORB.h>
+#include <uORB/topics/quad_flot.h>
+
 #include "mixer.h"
 
 #define debug(fmt, args...)	do { } while(0)
@@ -265,7 +273,7 @@ MixerGroup::load_from_buf(const char *buf, unsigned &buflen)
 			break;
 
 		case 'R':
-			m = MultirotorMixer::from_text(_control_cb, _cb_handle, p, resid);
+			m = MultirotorMixerWithDynamicGeometry::from_text(_control_cb, _cb_handle, p, resid);
 			break;
 
 		case 'H':
