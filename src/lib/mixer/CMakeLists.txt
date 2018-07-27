@@ -49,9 +49,10 @@ set(geometry_files
 	quad_vtail.toml
 	quad_wide.toml
 	quad_x.toml
+	quad_module.toml
 	quad_x_pusher.toml
 	quad_y.toml
-	tri_y.toml
+	#tri_y.toml   # Adrien : Commented to save some space in the firmware 
 	twin_engine.toml
 )
 
