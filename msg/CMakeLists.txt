@@ -85,6 +85,7 @@ set(msg_files
 	power_button_state.msg
 	pwm_input.msg
 	qshell_req.msg
+    quad_flot.msg
 	rate_ctrl_status.msg
 	rc_channels.msg
 	rc_parameter_map.msg
