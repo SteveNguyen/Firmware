@@ -35,7 +35,7 @@
 
 PWMSim::PWMSim() :
 	CDev("pwm_out_sim", PWM_OUTPUT0_DEVICE_PATH),
-	_perf_control_latency(perf_alloc(PC_ELAPSED, "pwm_out_sim control latency"))
+	_perf_control_latency(perf_alloc(PC_ELAPSED, "pwm_out_sim control latency"))    
 {
 	for (unsigned i = 0; i < MAX_ACTUATORS; i++) {
 		_pwm_min[i] = PWM_SIM_PWM_MIN_MAGIC;
@@ -46,6 +46,8 @@ PWMSim::PWMSim() :
 	_control_topics[1] = ORB_ID(actuator_controls_1);
 	_control_topics[2] = ORB_ID(actuator_controls_2);
 	_control_topics[3] = ORB_ID(actuator_controls_3);
+
+    _quad_flot_topic = ORB_ID(quad_flot);
 
 	for (unsigned i = 0; i < actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS; i++) {
 		_control_subs[i] = -1;
@@ -139,6 +141,8 @@ PWMSim::subscribe()
 			_poll_fds_num++;
 		}
 	}
+			
+    _quad_flot_subs = orb_subscribe(_quad_flot_topic);
 }
 
 void PWMSim::update_params()
@@ -234,6 +238,63 @@ PWMSim::run()
 
 		/* can we mix? */
 		if (_armed && _mixers != nullptr) {
+
+
+            /* We update rotors geometries */
+		    bool rotor_updated = false;
+		    orb_check(_quad_flot_subs, &rotor_updated);
+            if( rotor_updated ){
+                struct quad_flot_s quad_flot_data;
+                orb_copy(_quad_flot_topic, _quad_flot_subs, &quad_flot_data);
+                _mixers->change_rotor(
+                    0,
+                    {
+                        .roll_scale = (float) quad_flot_data.rotor_0[0],
+                        .pitch_scale = (float) quad_flot_data.rotor_0[1],
+                        .yaw_scale = (float) quad_flot_data.rotor_0[2],
+                        .thrust_scale = (float) quad_flot_data.rotor_0[3]
+                    }
+                );
+                _mixers->change_rotor(
+                    1,
+                    {
+                        .roll_scale = (float) quad_flot_data.rotor_1[0],
+                        .pitch_scale = (float) quad_flot_data.rotor_1[1],
+                        .yaw_scale = (float) quad_flot_data.rotor_1[2],
+                        .thrust_scale = (float) quad_flot_data.rotor_1[3]
+                    }
+                );
+                _mixers->change_rotor(
+                    2,
+                    {
+                        .roll_scale = (float) quad_flot_data.rotor_2[0],
+                        .pitch_scale = (float) quad_flot_data.rotor_2[1],
+                        .yaw_scale = (float) quad_flot_data.rotor_2[2],
+                        .thrust_scale = (float) quad_flot_data.rotor_2[3]
+                    }
+                );
+                _mixers->change_rotor(
+                    3,
+                    {
+                        .roll_scale = (float) quad_flot_data.rotor_3[0],
+                        .pitch_scale = (float) quad_flot_data.rotor_3[1],
+                        .yaw_scale = (float) quad_flot_data.rotor_3[2],
+                        .thrust_scale = (float) quad_flot_data.rotor_3[3]
+                    }
+                );
+                struct Mixer::Rotor rot;
+                for( unsigned int i = 0; i<4; i++ ){
+                    rot = _mixers->get_rotor( i );
+                    PX4_INFO(
+                        "Rotor %d :\t%8.4f\t%8.4f\t%8.4f\t%8.4f", i,
+                        (double)rot.roll_scale,
+                        (double)rot.pitch_scale,
+                        (double)rot.yaw_scale,
+                        (double)rot.thrust_scale
+                    );
+                }
+            }
+
 
 			/* do mixing */
 			unsigned num_outputs = _mixers->mix(&_actuator_outputs.output[0], _num_outputs);
@@ -339,6 +400,7 @@ PWMSim::run()
 
 	orb_unsubscribe(_armed_sub);
 	orb_unsubscribe(params_sub);
+	orb_unsubscribe(_quad_flot_subs);
 }
 
 int

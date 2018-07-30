@@ -51,6 +51,7 @@
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/actuator_outputs.h>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/topics/quad_flot.h>
 
 class PWMSim : public device::CDev, public ModuleBase<PWMSim>
 {
@@ -140,6 +141,10 @@ private:
 	void 	subscribe();
 
 	void 	update_params();
+
+
+	orb_id_t _quad_flot_topic;
+	int _quad_flot_subs {-1};
 };
 
 #endif /* DRIVERS_PWM_OUT_SIM_PWMSIM_HPP_ */
