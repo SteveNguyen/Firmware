@@ -38,10 +38,10 @@ set(geometry_files
 	hex_plus.toml
 	hex_t.toml
 	hex_x.toml
-	octa_cox.toml
-	octa_cox_wide.toml
-	octa_plus.toml
-	octa_x.toml
+	#octa_cox.toml     # Adrien : We save some space in the firmware
+	#octa_cox_wide.toml     # Adrien : We save some space in the firmware
+	#octa_plus.toml     # Adrien : We save some space in the firmware
+	#octa_x.toml     # Adrien : We save some space in the firmware
 	quad_deadcat.toml
 	quad_h.toml
 	quad_plus.toml

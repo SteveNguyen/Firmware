@@ -314,3 +314,39 @@ void MixerGroup::set_max_delta_out_once(float delta_out_max)
 		mixer = mixer->_next;
 	}
 }
+
+void Mixer::change_rotor(
+    unsigned rotor_id, const struct Mixer::Rotor & rotor
+){
+    if( _next ){
+        _next->change_rotor( rotor_id, rotor );
+    }
+}
+struct Mixer::Rotor Mixer::get_rotor(
+    unsigned rotor_id
+){
+    if( _next ){
+        return _next->get_rotor( rotor_id );
+    }
+    return {0.0, 0.0, 0.0, 0.0};
+}
+
+
+void MixerGroup::change_rotor(
+    unsigned rotor_id, const struct Mixer::Rotor & rotor
+){
+    if( _first ){
+        _first->change_rotor( rotor_id, rotor );
+    }
+}
+struct Mixer::Rotor MixerGroup::get_rotor(
+    unsigned rotor_id
+){
+    if( _first ){
+        return _first->get_rotor( rotor_id );
+    }
+    return {0.0, 0.0, 0.0, 0.0};
+}
+
+
+
