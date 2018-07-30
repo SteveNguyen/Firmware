@@ -70,6 +70,7 @@
 #include <uORB/topics/safety.h>
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/quad_flot.h>
 
 #ifdef HRT_PPM_CHANNEL
 # include <systemlib/ppm_decode.h>
@@ -251,6 +252,9 @@ private:
 	bool		_pwm_initialized;
 
 	MixerGroup	*_mixers;
+	
+    orb_id_t _quad_flot_topic;
+	int _quad_flot_subs {-1};
 
 	uint32_t	_groups_required;
 	uint32_t	_groups_subscribed;
@@ -410,6 +414,8 @@ PX4FMU::PX4FMU(bool run_as_task) :
 	_control_topics[2] = ORB_ID(actuator_controls_2);
 	_control_topics[3] = ORB_ID(actuator_controls_3);
 
+    _quad_flot_topic = ORB_ID(quad_flot);
+
 	memset(_controls, 0, sizeof(_controls));
 	memset(_poll_fds, 0, sizeof(_poll_fds));
 
@@ -453,6 +459,7 @@ PX4FMU::~PX4FMU()
 
 	orb_unsubscribe(_armed_sub);
 	orb_unsubscribe(_param_sub);
+    orb_unsubscribe(_quad_flot_subs);
 
 	orb_unadvertise(_to_input_rc);
 	orb_unadvertise(_outputs_pub);
@@ -913,6 +920,8 @@ PX4FMU::subscribe()
 			_poll_fds_num++;
 		}
 	}
+    
+    _quad_flot_subs = orb_subscribe(_quad_flot_topic);
 }
 
 void
@@ -1329,6 +1338,52 @@ PX4FMU::cycle()
 				if (_thr_mdl_fac > FLT_EPSILON) {
 					_mixers->set_thrust_factor(_thr_mdl_fac);
 				}
+
+
+                /* We update rotors geometries */
+                bool rotor_updated = false;
+                orb_check(_quad_flot_subs, &rotor_updated);
+                if( rotor_updated ){
+                    struct quad_flot_s quad_flot_data;
+                    orb_copy(_quad_flot_topic, _quad_flot_subs, &quad_flot_data);
+                    _mixers->change_rotor(
+                        0,
+                        {
+                            .roll_scale = (float) quad_flot_data.rotor_0[0],
+                            .pitch_scale = (float) quad_flot_data.rotor_0[1],
+                            .yaw_scale = (float) quad_flot_data.rotor_0[2],
+                            .thrust_scale = (float) quad_flot_data.rotor_0[3]
+                        }
+                    );
+                    _mixers->change_rotor(
+                        1,
+                        {
+                            .roll_scale = (float) quad_flot_data.rotor_1[0],
+                            .pitch_scale = (float) quad_flot_data.rotor_1[1],
+                            .yaw_scale = (float) quad_flot_data.rotor_1[2],
+                            .thrust_scale = (float) quad_flot_data.rotor_1[3]
+                        }
+                    );
+                    _mixers->change_rotor(
+                        2,
+                        {
+                            .roll_scale = (float) quad_flot_data.rotor_2[0],
+                            .pitch_scale = (float) quad_flot_data.rotor_2[1],
+                            .yaw_scale = (float) quad_flot_data.rotor_2[2],
+                            .thrust_scale = (float) quad_flot_data.rotor_2[3]
+                        }
+                    );
+                    _mixers->change_rotor(
+                        3,
+                        {
+                            .roll_scale = (float) quad_flot_data.rotor_3[0],
+                            .pitch_scale = (float) quad_flot_data.rotor_3[1],
+                            .yaw_scale = (float) quad_flot_data.rotor_3[2],
+                            .thrust_scale = (float) quad_flot_data.rotor_3[3]
+                        }
+                    );
+                }
+
 
 				/* do mixing */
 				float outputs[_max_actuators];
