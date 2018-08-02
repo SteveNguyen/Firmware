@@ -344,6 +344,16 @@ private:
 	 * @param values PWM values to reorder
 	 */
 	inline void reorder_outputs(uint16_t values[MAX_ACTUATORS]);
+
+    float _rotor[4][4];
+    static const char* _rotor_param[4][4];
+};
+
+const char* PX4FMU::_rotor_param[4][4] = {
+    { "ROTOR_0_0", "ROTOR_0_1", "ROTOR_0_2", "ROTOR_0_3" },
+    { "ROTOR_1_0", "ROTOR_1_1", "ROTOR_1_2", "ROTOR_1_3" },
+    { "ROTOR_2_0", "ROTOR_2_1", "ROTOR_2_2", "ROTOR_2_3" },
+    { "ROTOR_3_0", "ROTOR_3_1", "ROTOR_3_2", "ROTOR_3_3" }
 };
 
 #if defined(BOARD_HAS_FMU_GPIO)
@@ -1844,6 +1854,32 @@ void PX4FMU::update_params()
 	if (param_handle != PARAM_INVALID) {
 		param_get(param_handle, (int32_t *)&_motor_ordering);
 	}
+
+    if (_mixers != nullptr) {
+        for( unsigned int i=0; i<4; i++ ){
+            for( unsigned int j=0; j<4; j++ ){
+                param_handle = param_find( _rotor_param[i][j] );
+                if (param_handle != PARAM_INVALID) {
+                    param_get(param_handle, &_rotor[i][j]);
+                }
+            }
+            struct Mixer::Rotor rotor = {
+                .roll_scale = (float) _rotor[i][0],
+                .pitch_scale = (float) _rotor[i][1],
+                .yaw_scale = (float) _rotor[i][2],
+                .thrust_scale = (float) _rotor[i][3]
+            };    
+            _mixers->change_rotor( i, rotor );
+	        PX4_INFO(
+                "Rotor %d : %f, %f, %f, %f", i,
+                (double)_rotor[i][0], 
+                (double)_rotor[i][1], 
+                (double)_rotor[i][2], 
+                (double)_rotor[i][3] 
+            );
+        }
+    }
+
 }
 
 
@@ -2604,6 +2640,17 @@ PX4FMU::pwm_ioctl(file *filp, int cmd, unsigned long arg)
 			} else {
 
 				ret = _mixers->load_from_buf(buf, buflen);
+                for( unsigned int i=0; i<4; i++ ){
+                    struct Mixer::Rotor rotor = _mixers->get_rotor( i );
+                    _rotor[i][0] = rotor.roll_scale;
+                    _rotor[i][1] = rotor.pitch_scale;
+                    _rotor[i][2] = rotor.yaw_scale;
+                    _rotor[i][3] = rotor.thrust_scale;
+                    for( unsigned int j=0; j<4; j++ ){
+                        param_t param_handle = param_find( _rotor_param[i][j] );
+                        param_set(param_handle, &_rotor[i][j]);
+                    }    
+                }
 
 				if (ret != 0) {
 					PX4_DEBUG("mixer load failed with %d", ret);

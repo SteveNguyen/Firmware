@@ -32,12 +32,12 @@
 ############################################################################
 
 set(geometry_files
-	dodeca_bottom_cox.toml
-	dodeca_top_cox.toml
-	hex_cox.toml
-	hex_plus.toml
-	hex_t.toml
-	hex_x.toml
+	#dodeca_bottom_cox.toml     # Adrien : We save some space in the firmware
+	#dodeca_top_cox.toml     # Adrien : We save some space in the firmware
+	#hex_cox.toml     # Adrien : We save some space in the firmware
+	#hex_plus.toml     # Adrien : We save some space in the firmware
+	#hex_t.toml     # Adrien : We save some space in the firmware
+	#hex_x.toml     # Adrien : We save some space in the firmware
 	#octa_cox.toml     # Adrien : We save some space in the firmware
 	#octa_cox_wide.toml     # Adrien : We save some space in the firmware
 	#octa_plus.toml     # Adrien : We save some space in the firmware
@@ -51,8 +51,8 @@ set(geometry_files
 	quad_x.toml
 	quad_x_pusher.toml
 	quad_y.toml
-	tri_y.toml
-	twin_engine.toml
+	#tri_y.toml     # Adrien : We save some space in the firmware
+	#twin_engine.toml     # Adrien : We save some space in the firmware
 )
 
 set(geometries_list)
