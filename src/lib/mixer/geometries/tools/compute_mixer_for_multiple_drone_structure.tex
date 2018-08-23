@@ -1,0 +1,494 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8]{inputenc}   % LaTeX, comprends les accents !
+\usepackage[T1]{fontenc}      % Police contenant les caractères français
+\usepackage[francais]{babel}  % Placez ici une liste de langues, la
+                              % dernière étant la langue principale
+
+% Uppercase and Bold
+\newcommand{\UB}[1]{ \bm{\mathrm{#1}} }
+\usepackage[a4paper]{geometry}% Réduire les marges
+% \pagestyle{headings}        % Pour mettre des entêtes avec les titres
+                              % des sections en haut de page
+
+\title{Adaptation of the article "ModQuad: The Flying Modular Structure that Self-Assembles in Midair" in Px4}           % Les paramètres du titre : titre, auteur, date
+%\author{Curabitur \and Elementum}
+\date{12 August 2018}                       % La date n'est pas requise (la date du
+                              % jour de compilation est utilisée en son
+			      % absence)
+
+\sloppy                       % Ne pas faire déborder les lignes dans la marge
+\usepackage{hyperref}
+\usepackage{bm}
+
+\begin{document}
+
+\maketitle                    % Faire un titre utilisant les données
+                              % passées à \title, \author et \date
+
+%\begin{abstract}
+%\end{abstract}
+
+%\tableofcontents              % Table des matières
+This document explains how to adapt the article {\it ModQuad: The Flying Modular Structure that Self-Assembles in Midair }
+written by David Salda, Bruno Gabrich, Guanrui Li, Mark Yim, and Vijay Kumar. \\
+
+The version of the article we used come from :
+\url{https://www.seas.upenn.edu/~dsaldana/pdf/icra18-modquad.pdf}
+(11 august 2018). %{https://www.seas.upenn.edu/~dsaldana/pdf/icra18-modquad.pdf}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Abstract}
+
+When we assemble a structure of $n$ drones, we need to change, in the px4 library, the rotor matrix of each drone $i$ 
+with the new rotor matrix $\UB{R}_{i,px4}$ defined by :
+$$
+\UB{R}_{i,px4}
+=
+\UB{S}
+\cdot
+\UB{P}_i
+\cdot
+\UB{H}_n
+\cdot
+\UB{P}^{-1}
+\cdot
+\UB{S}^{-1}
+\cdot
+\UB{R}_{px4}.
+$$
+
+The matrix $\UB{R}_{px4}$ is the rotor matrix of one drone given by the Px4 library.\\
+
+The matrix $\UB{S}$ is the permutation matrix that renumber rotor ids in the article to px4 rotor ids :
+$$
+\UB{S}=
+\left[
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0
+\end{array}
+\right].
+$$
+
+The matrix $\UB{P}_i$ is
+$$
+\UB{P}_i
+=
+\left[
+\begin{array}{cccc}
+1 & \mathcal{X}(y_{i} - d) & \mathcal{X}(x_{i} + d) &  1  \\
+1 & \mathcal{X}(y_{i} - d) & \mathcal{X}(x_{i} - d) & -1  \\
+1 & \mathcal{X}(y_{i} + d) & \mathcal{X}(x_{i} - d) &  1  \\
+1 & \mathcal{X}(y_{i} + d) & \mathcal{X}(x_{i} + d) & -1  \\
+\end{array}
+\right],
+$$
+where $\mathcal{X}(t)$ is the function that returns $1$ if $t$ is positive, and $-1$ if $t$ is negative, and $(x_i, y_i)$ is the position of the center of the drone $i$ in the frame structure (the origin is set on the center of mass of the structure).\\
+
+The matrix $\UB{P}$ is
+$$
+\UB{P}
+=
+\left[
+\begin{array}{cccc}
+1 & -1 & +1 &  1  \\
+1 & -1 & -1 & -1  \\
+1 & +1 & -1 &  1  \\
+1 & +1 & +1 & -1  \\
+\end{array}
+\right].
+$$
+
+The matrix $\UB{H}_n$ is
+$$
+\UB{H}_n = \mathrm{Diag}( [1/n, 1, 1, 1]^T ).
+$$
+
+\section{Notations}
+
+A sutructure of $n$ drones are glued together.\\
+
+Let $\UB{u}_1$ be the vector $(f_{i1}, f_{i2}, f_{i3}, f_{i4})$ of the 4 forces associated with the 4 rotors of the drone $i$ in the structure.\\
+
+Let $I$ be the inertial matrix of one drone. All drones have the same inertia matrix.
+Let $(x_i,y_i)$ be the position of the module in the frame structure.
+The origin of the frame is the position of the center of mass of the complete structure.\\
+
+Let $\dot{\UB{\Omega}}_S$ be the angular velocity of the struture, and $\dot{\UB{\Omega}}_S^*$
+the desired angular velocity. \\
+
+Let $\dot{\UB{\Omega}}_i$ be the angular velocity of the particualar drone, and $\dot{\UB{\Omega}}_i^*$
+it's desired angular velocity. \\
+
+Let $d$ be the x-distance between the center of the drone and one rotor.\\
+
+We denote by $\mathcal{X}(t)$ the function that returns $1$ if $t$ is positive, and $-1$ if $t$ is negative.\\
+
+Let $F$ we the total thrust of the structure.
+
+\section{Short abstract of the article}
+
+The article propose the following equation to compute 
+$\dot{\UB{\Omega}}_S$ from $\dot{\UB{\Omega}}_i^*$: 
+$$
+\dot{\UB{\Omega}}_S^*
+=
+\UB{I}_S^{-1} \UB{I} \UB{D} \dot{\UB{\Omega}}_i^*
+.
+$$
+
+The article explains that, to compute good rotor forces, we need to use the following equation :
+$$
+\UB{u}_i
+=
+\UB{P}_i
+\UB{C}
+\left[
+    \begin{array}{c}
+        F \\
+        \UB{I}_S \dot{\UB{\Omega}}_S^*
+    \end{array}
+\right],
+$$
+where $C = \mathrm{Diag}( [1/(4n), C_x^{-1}, C_y^{-1}, C_z^{-1}]^T )$,
+$$
+\UB{P}_i
+=
+\left[
+\begin{array}{cccc}
+1 & \mathcal{X}(y_{i} - d) & \mathcal{X}(x_{i} + d) &  1  \\
+1 & \mathcal{X}(y_{i} - d) & \mathcal{X}(x_{i} - d) & -1  \\
+1 & \mathcal{X}(y_{i} + d) & \mathcal{X}(x_{i} - d) &  1  \\
+1 & \mathcal{X}(y_{i} + d) & \mathcal{X}(x_{i} + d) & -1  \\
+\end{array}
+\right]
+$$
+and
+$$
+\left\{
+\begin{array}{rcl}
+C_x & = & 2 \sum_i |y_i+d|+|y_i-d| \\
+C_y & = & 2 \sum_i |x_i+d|+|x_i-d| \\
+C_z & = & 4n \frac{k_M}{k_F}
+\end{array}
+\right.
+$$
+and $k_M$ and $k_F$ are some coefficients.
+
+from that two last formulas, they obtain:
+$$
+\UB{u}_i
+=
+\UB{P}_i
+\UB{E}
+\left[
+    \begin{array}{c}
+        F \\
+        \UB{I} \dot{\UB{\Omega}}^*
+    \end{array}
+\right],
+$$
+where 
+$$
+\UB{E} 
+=
+\mathrm{Diag}( [1/(4n), 4d, 4d, 4]^T ).
+$$
+In fact, it seems that there is an error and $E$ should be equals to
+$$
+\begin{array}{rcl}
+\UB{E}_{corr.} & = & \UB{C} \cdot ( 1 \otimes \UB{D} );\\
+       & = & \mathrm{Diag}( [1/(4n), C_x^{-1}, C_y^{-1}, C_z^{-1}]^T )
+             \cdot
+             \mathrm{Diag}( [1, C_x/(4d), C_y/(4d), C_z]^T ); \\
+       & = & \mathrm{Diag}( [1/(4n), 1/(4d), 1/(4d), 1]^T ).
+\end{array}
+$$
+
+\section{Some reformulations in order to use the article with the PX4 library}
+
+First we will refomulate the two last equations to obtain an equation that works in all cases
+(with or without the correction).
+
+Let 
+$$
+\UB{H}_n = \mathrm{Diag}( [1/n, 1, 1, 1]^T ),
+$$
+$$
+\UB{E}' = \mathrm{Diag}( [1/4, 4d, 4d, 4]^T )
+\hspace{.5cm}
+and 
+\hspace{.5cm}
+\UB{E}'_{corr} = \mathrm{Diag}( [1/4, 1/(4d), 1/(4d), 1]^T ).
+$$
+Then, we have
+$$
+\UB{E} = \UB{H}_n \cdot \UB{E}',
+\hspace{1cm}
+\UB{E}_{corr} = \UB{H}_n \cdot \UB{E}'_{corr}.
+$$
+We can just remark that $\UB{E}'$ and $\UB{E}'_{corr}$ are fixed and don't depend on $n$ and $(x_i,y_i)$.
+
+So, now, we have the two following equations :
+$$
+\UB{u}_i
+=
+\UB{P}_i
+\cdot
+\UB{H}_n
+\cdot
+\UB{E}'
+\left[
+    \begin{array}{c}
+        F \\
+        \UB{I} \dot{\UB{\Omega}}_i^*
+    \end{array}
+\right]
+\hspace{1cm}
+and
+\hspace{1cm}
+\UB{u}_i
+=
+\UB{P}_i
+\cdot
+\UB{H}_n
+\cdot
+\UB{E}'_{corr}
+\cdot
+\left[
+    \begin{array}{c}
+        F \\
+        \UB{I} \dot{\UB{\Omega}}_i^*
+    \end{array}
+\right]
+.
+$$
+That two formulas have the same form : 
+$$
+\UB{u}_i
+=
+\UB{P}_i
+\cdot
+\UB{H}_n
+\cdot
+\UB{L}
+\cdot
+\UB{A}_{i}
+$$
+where $\UB{L}$ is a fixed matrix, and $\UB{A}_{i}$ is a desired attitude control.
+The values of $\UB{L}$ and $\UB{A}_{i}$ depend of the equation you prefere to use.
+
+\section{Px4 implementation of drone control}
+
+Let $\UB{u}_{px4}$ be the rotor forces in PX4 libratry and 
+$\UB{u}$ the vector of rotor force of the article model.
+Px4 and article don't number in the same way the rotor of the drone.
+Those two vector are related together by the following formula :
+$$
+\UB{u}_{px4} = \UB{S} \cdot \UB{u}
+$$
+where $\UB{S}$ is the following permutation matrix : 
+$$
+\UB{S}=
+\left[
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0
+\end{array}
+\right].
+$$
+
+Now, let $\UB{A}_{px4}$ be the desired attitude, then, in Px4, there is a matrix 
+$\UB{R}_{px4}$, called the rotors matrix, present in the mixer, that rely $\UB{u}_{px4}$ and the desired attitude:
+$$
+\UB{u}_{px4} = \UB{R}_{px4} \cdot \UB{A}_{px4}
+$$
+
+Since control equation are the same and are linear, there exists a inversible matrix $\UB{J}$ that rely the desired control attitude $\UB{A}$ of the article to 
+$\UB{A}_{px4}$ such that :
+$$
+\UB{A} = \UB{J} \cdot \UB{A}_{px4}.
+$$
+
+\section{Study of a structure containing one drone}
+
+Now, suppose the structure contains just one drone ($n=1$).
+
+In that structure the matrix $P_1$ will be denoted by $P$ and is equal to:
+$$
+P
+=
+\left[
+\begin{array}{cccc}
+1 & \mathcal{X}(0 - d) & \mathcal{X}(0 + d) &  1  \\
+1 & \mathcal{X}(0 - d) & \mathcal{X}(0 - d) & -1  \\
+1 & \mathcal{X}(0 + d) & \mathcal{X}(0 - d) &  1  \\
+1 & \mathcal{X}(0 + d) & \mathcal{X}(0 + d) & -1 
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cccc}
+1 & -1 & +1 &  1  \\
+1 & -1 & -1 & -1  \\
+1 & +1 & -1 &  1  \\
+1 & +1 & +1 & -1
+\end{array}
+\right].
+$$
+
+The matrix $\UB{A}_{1}$ and $\UB{A}_{1,px4}$
+will be denoted respectively by $\UB{A}$,
+$\UB{A}_{px4}$.
+the vector $\UB{u}_{1}$ and 
+$\UB{u}_{1,px4}$ will be denoted respectively by $\UB{u}$ and $\UB{u}_{px4}$.
+
+We can compute $\UB{u}$ and obtain
+$$
+\begin{array}{rcl}
+\UB{u}
+& = &
+\UB{P}
+\cdot
+\UB{H}_1
+\cdot
+\UB{L}
+\cdot
+\UB{A} \\
+& = &
+\UB{P}
+\cdot
+\UB{L}
+\cdot
+\UB{J}
+\cdot
+\UB{A}_{px4}.
+\end{array}
+$$
+
+As $
+\UB{u}
+=
+\UB{S}^{-1}
+\cdot
+\UB{u}_{px4} 
+=
+\UB{S}^{-1}
+\cdot
+\UB{R}_{px4}
+\cdot
+\UB{A}_{px4}
+$, we deduce that 
+$$
+\UB{S}^{-1}
+\cdot
+\UB{R}_{px4}
+\cdot
+\UB{A}_{px4}
+=
+\UB{P}
+\cdot
+\UB{L}
+\cdot
+\UB{J}
+\cdot
+\UB{A}_{px4}
+$$ for any desired attitude.
+
+We obtain a value for $\UB{L} \cdot \UB{J}$ : 
+$$
+\UB{L} \cdot \UB{J}
+=
+\UB{P}^{-1}
+\cdot
+\UB{S}^{-1}
+\cdot
+\UB{R}_{px4}.
+$$
+
+\section{Study of a structure containing $n$ drones}
+
+Suppose now, that the structure contains $n$ drones, then
+$$
+\begin{array}{rcl}
+\UB{u}_i
+    & = &
+    \UB{P}_i
+    \cdot
+    \UB{H}_n
+    \cdot
+    \UB{L}
+    \cdot
+    \UB{A}_{i}
+\\
+    & = &
+    \UB{P}_i
+    \cdot
+    \UB{H}_n
+    \cdot
+    \UB{L}
+    \cdot
+    \UB{J}
+    \cdot
+    \UB{A}_{i,px4}
+\\
+    & = &
+    \UB{P}_i
+    \cdot
+    \UB{H}_n
+    \cdot
+    \UB{P}^{-1}
+    \cdot
+    \UB{S}^{-1}
+    \cdot
+    \UB{R}_{px4}
+    \cdot
+    \UB{A}_{i,px4}.
+\end{array}
+$$
+As $\UB{u}_i = \UB{S}^{-1} \cdot \UB{U}_{i,px4}$, we deduce finally that
+$$
+\UB{u}_{i,px4}
+=
+\UB{S}
+\cdot
+\UB{P}_i
+\cdot
+\UB{H}_n
+\cdot
+\UB{P}^{-1}
+\cdot
+\UB{S}^{-1}
+\cdot
+\UB{R}_{px4}
+\cdot
+\UB{A}_{i,px4}.
+$$
+
+So, when we assemble a structure of $n$ drones, we need to change, in the px4 library, the rotor matrix of each drone $i$ 
+with the new rotor matrix $\UB{R}_{i,px4}$ defined by :
+$$
+\UB{R}_{i,px4}
+=
+\UB{S}
+\cdot
+\UB{P}_i
+\cdot
+\UB{H}_n
+\cdot
+\UB{P}^{-1}
+\cdot
+\UB{S}^{-1}
+\cdot
+\UB{R}_{px4}
+.
+$$
+\end{document}
