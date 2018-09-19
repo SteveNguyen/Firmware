@@ -74,9 +74,18 @@ MultirotorMixer::MultirotorMixer(ControlCallback control_cb,
 	_thrust_factor(0.0f),
 	_airmode(false),
 	_rotor_count(_config_rotor_count[(MultirotorGeometryUnderlyingType)geometry]),
-	_rotors(_config_index[(MultirotorGeometryUnderlyingType)geometry]),
+	_rotors(
+        new struct Rotor[_rotor_count]
+    ),
 	_outputs_prev(new float[_rotor_count])
 {
+    
+    memcpy(
+        _rotors,
+        _config_index[(MultirotorGeometryUnderlyingType)geometry],
+        _rotor_count*sizeof(struct Rotor)
+    );
+
 	for (unsigned i = 0; i < _rotor_count; ++i) {
 		_outputs_prev[i] = _idle_speed;
 	}

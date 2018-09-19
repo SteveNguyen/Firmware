@@ -47,6 +47,7 @@
 #include <px4_module.h>
 #include <px4_tasks.h>
 #include <px4_time.h>
+#include <px4_module_params.h>
 #include <uORB/topics/actuator_armed.h>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/actuator_outputs.h>
@@ -140,6 +141,10 @@ private:
 	void 	subscribe();
 
 	void 	update_params();
+
+    float _rotor[4][4];
+    static const char* _rotor_param[4][4];
+
 };
 
 #endif /* DRIVERS_PWM_OUT_SIM_PWMSIM_HPP_ */

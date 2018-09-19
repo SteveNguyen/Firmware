@@ -33,6 +33,13 @@
 
 #include "PWMSim.hpp"
 
+const char* PWMSim::_rotor_param[4][4] = {
+    { "ROTOR_0_0", "ROTOR_0_1", "ROTOR_0_2", "ROTOR_0_3" },
+    { "ROTOR_1_0", "ROTOR_1_1", "ROTOR_1_2", "ROTOR_1_3" },
+    { "ROTOR_2_0", "ROTOR_2_1", "ROTOR_2_2", "ROTOR_2_3" },
+    { "ROTOR_3_0", "ROTOR_3_1", "ROTOR_3_2", "ROTOR_3_3" }
+};
+
 PWMSim::PWMSim() :
 	CDev("pwm_out_sim", PWM_OUTPUT0_DEVICE_PATH),
 	_perf_control_latency(perf_alloc(PC_ELAPSED, "pwm_out_sim control latency"))
@@ -151,6 +158,32 @@ void PWMSim::update_params()
 		param_get(param_handle, &val);
 		_airmode = val > 0;
 	}
+
+
+    if (_mixers != nullptr) {
+        for( unsigned int i=0; i<4; i++ ){
+            for( unsigned int j=0; j<4; j++ ){
+                param_handle = param_find( _rotor_param[i][j] );
+                if (param_handle != PARAM_INVALID) {
+                    param_get(param_handle, &_rotor[i][j]);
+                }
+            }
+            struct Mixer::Rotor rotor = {
+                .roll_scale = (float) _rotor[i][0],
+                .pitch_scale = (float) _rotor[i][1],
+                .yaw_scale = (float) _rotor[i][2],
+                .thrust_scale = (float) _rotor[i][3]
+            };    
+            _mixers->change_rotor( i, rotor );
+	        PX4_INFO(
+                "Rotor %d : %f, %f, %f, %f", i,
+                (double)_rotor[i][0], 
+                (double)_rotor[i][1], 
+                (double)_rotor[i][2], 
+                (double)_rotor[i][3] 
+            );
+        }
+    }
 }
 
 void
@@ -525,6 +558,7 @@ PWMSim::ioctl(device::file_t *filp, int cmd, unsigned long arg)
 			} else {
 				if (_mixers == nullptr) {
 					_mixers = new MixerGroup(control_callback, (uintptr_t)&_controls);
+                    
 				}
 
 				_mixers->add_mixer(mixer);
@@ -549,6 +583,17 @@ PWMSim::ioctl(device::file_t *filp, int cmd, unsigned long arg)
 			} else {
 
 				ret = _mixers->load_from_buf(buf, buflen);
+                for( unsigned int i=0; i<4; i++ ){
+                    struct Mixer::Rotor rotor = _mixers->get_rotor( i );
+                    _rotor[i][0] = rotor.roll_scale;
+                    _rotor[i][1] = rotor.pitch_scale;
+                    _rotor[i][2] = rotor.yaw_scale;
+                    _rotor[i][3] = rotor.thrust_scale;
+                    for( unsigned int j=0; j<4; j++ ){
+                        param_t param_handle = param_find( _rotor_param[i][j] );
+                        param_set(param_handle, &_rotor[i][j]);
+                    }    
+                }
 
 				if (ret != 0) {
 					PX4_ERR("mixer load failed with %d", ret);

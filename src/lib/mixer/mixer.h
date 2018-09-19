@@ -140,6 +140,17 @@
 class __EXPORT Mixer
 {
 public:
+	/**
+
+	 * Precalculated rotor mix.
+	 */
+	struct Rotor {
+		float	roll_scale;		/**< scales roll for this rotor */
+		float	pitch_scale;	/**< scales pitch for this rotor */
+		float	yaw_scale;		/**< scales yaw for this rotor */
+		float	thrust_scale;	/**< scales thrust for this rotor */
+	};
+
 	/** next mixer in a list */
 	Mixer				*_next;
 
@@ -164,6 +175,9 @@ public:
 	 */
 	Mixer(ControlCallback control_cb, uintptr_t cb_handle);
 	virtual ~Mixer() {}
+
+    virtual void change_rotor( unsigned rotor_id, const struct Rotor & rotor );
+    virtual struct Rotor get_rotor( unsigned rotor_id );
 
 	/**
 	 * Perform the mixing function.
@@ -421,6 +435,9 @@ public:
 
 	virtual void 	set_airmode(bool airmode);
 
+    virtual void change_rotor( unsigned rotor_id, const struct Rotor & rotor );
+    virtual struct Rotor get_rotor( unsigned rotor_id );
+
 private:
 	Mixer				*_first;	/**< linked list of mixers */
 
@@ -580,16 +597,6 @@ enum class MultirotorGeometry : MultirotorGeometryUnderlyingType;
 class __EXPORT MultirotorMixer : public Mixer
 {
 public:
-	/**
-
-	 * Precalculated rotor mix.
-	 */
-	struct Rotor {
-		float	roll_scale;		/**< scales roll for this rotor */
-		float	pitch_scale;	/**< scales pitch for this rotor */
-		float	yaw_scale;		/**< scales yaw for this rotor */
-		float	thrust_scale;	/**< scales thrust for this rotor */
-	};
 
 	/**
 	 * Constructor.
@@ -661,6 +668,10 @@ public:
 		return _rotor_count;
 	}
 
+    virtual struct Rotor get_rotor( unsigned rotor_id );
+    virtual void change_rotor( unsigned rotor_id, const struct Rotor & rotor );
+
+
 	/**
 	 * @brief      Sets the thrust factor used to calculate mapping from desired thrust to pwm.
 	 *
@@ -701,7 +712,7 @@ private:
 	saturation_status _saturation_status;
 
 	unsigned			_rotor_count;
-	const Rotor			*_rotors;
+	Rotor               *_rotors;
 
 	float 				*_outputs_prev = nullptr;
 

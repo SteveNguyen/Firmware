@@ -225,3 +225,19 @@ NullMixer::from_text(const char *buf, unsigned &buflen)
 
 	return nm;
 }
+    
+void MultirotorMixer::change_rotor(
+    unsigned rotor_id, const struct Mixer::Rotor & rotor 
+){
+    if( rotor_id < _rotor_count ){
+        _rotors[rotor_id] = rotor; 
+    }
+}
+struct Mixer::Rotor MultirotorMixer::get_rotor(
+    unsigned rotor_id
+){
+    if( rotor_id < _rotor_count ){
+        return _rotors[rotor_id];
+    }
+    return {0.0, 0.0, 0.0, 0.0};
+}
