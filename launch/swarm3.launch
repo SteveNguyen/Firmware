@@ -14,17 +14,9 @@
     <arg name="recording" default="false"/>
 
     <param name ="/use_sim_time" value="true"/>
-
-    <!-- Talence -->
-    <!-- <param name="/geo_origin/alt" type="double" value="47.0" /> -->
-    <!-- <param name="/geo_origin/lat" type="double" value="44.805261" /> -->
-    <!-- <param name="/geo_origin/lon" type="double" value="-0.605788" /> -->
-
-    <!-- Zurich (default) -->
-    <param name="/geo_origin/alt" type="double" value="408.0" />
-    <param name="/geo_origin/lat" type="double" value="47.3667" />
-    <param name="/geo_origin/lon" type="double" value="8.5500" />
-
+    <param name="/geo_origin/alt" type="double" value="47.0" />
+    <param name="/geo_origin/lat" type="double" value="44.805261" />
+    <param name="/geo_origin/lon" type="double" value="-0.605788" />
 
 
     <!-- Gazebo sim -->
@@ -46,7 +38,7 @@
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
             <arg name="x" value="2"/>
             <arg name="y" value="0"/>
-            <arg name="z" value="1"/>
+            <arg name="z" value="0"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -75,9 +67,9 @@
         <arg name="fcu_url" default="udp://:14541@localhost:14559"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="2"/>
+            <arg name="x" value="4"/>
             <arg name="y" value="2"/>
-            <arg name="z" value="1"/>
+            <arg name="z" value="0"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -100,4 +92,41 @@
 	<param name="/uav2/mavros/local_position/tf/child_frame_id" type="string" value="uav2" />
 
     </group>
+
+
+
+
+    <!-- UAV3 -->
+    <group ns="uav3">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="ID" value="3"/>
+        <arg name="fcu_url" default="udp://:14542@localhost:14561"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find px4)/launch/single_vehicle_spawn.launch">
+            <arg name="x" value="6"/>
+            <arg name="y" value="4"/>
+            <arg name="z" value="0"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="rcS" value="$(find px4)/posix-configs/SITL/init/$(arg est)/$(arg vehicle)_$(arg ID)"/>
+            <arg name="mavlink_udp_port" value="14564"/>
+            <arg name="ID" value="$(arg ID)"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(arg ID)"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+
+	<param name="/uav3/mavros/global_position/child_frame_id" type="string" value="uav3" />
+	<param name="/uav3/mavros/global_position/tf/child_frame_id" type="string" value="uav3" />
+	<param name="/uav3/mavros/local_position/child_frame_id" type="string" value="uav3" />
+	<param name="/uav3/mavros/local_position/tf/child_frame_id" type="string" value="uav3" />
+
+    </group>
+
 </launch>
