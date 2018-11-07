@@ -24,7 +24,7 @@ param set COM_RC_IN_MODE 1
 param set EKF2_AID_MASK 1
 param set EKF2_ANGERR_INIT 0.01
 param set EKF2_GBIAS_INIT 0.01
-param set EKF2_HGT_MODE 1
+param set EKF2_HGT_MODE 0
 param set EKF2_MAG_TYPE 1
 param set MAV_TYPE 2
 param set MC_PITCH_P 6

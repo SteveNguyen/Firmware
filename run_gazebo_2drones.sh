@@ -5,14 +5,14 @@ export GAZEBO_PLUGIN_PATH=GAZEBO_PLUGIN_PATH:/home/steve/Project/DEV/catkin_ws/b
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd):$(pwd)/Tools/sitl_gazebo
 
 #Talence
-# export PX4_HOME_LAT=44.805261
-# export PX4_HOME_LON=-0.605788
-# export PX4_HOME_ALT=0.0
+export PX4_HOME_LAT=44.805261
+export PX4_HOME_LON=-0.605788
+export PX4_HOME_ALT=0.0
 
 #Zurich (default)
-export PX4_HOME_LAT=47.3667
-export PX4_HOME_LON=8.5500
-export PX4_HOME_ALT=408.0
+# export PX4_HOME_LAT=47.3667
+# export PX4_HOME_LON=8.5500
+# export PX4_HOME_ALT=408.0
 
 
 export PX4_GPS_FIX_TYPE=6

@@ -7,7 +7,7 @@
     <arg name="vehicle" default="myriad"/>
     <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
     <!-- gazebo configs -->
-    <arg name="gui" default="true"/>
+    <arg name="gui" default="false"/>
     <arg name="debug" default="false"/>
     <arg name="verbose" default="true"/>
     <arg name="paused" default="false"/>
@@ -16,19 +16,19 @@
     <param name ="/use_sim_time" value="true"/>
 
     <!-- Talence -->
-    <!-- <param name="/geo_origin/alt" type="double" value="47.0" /> -->
-    <!-- <param name="/geo_origin/lat" type="double" value="44.805261" /> -->
-    <!-- <param name="/geo_origin/lon" type="double" value="-0.605788" /> -->
+    <param name="/geo_origin/alt" type="double" value="47.0" />
+    <param name="/geo_origin/lat" type="double" value="44.805261" />
+    <param name="/geo_origin/lon" type="double" value="-0.605788" />
 
     <!-- Zurich (default) -->
-    <param name="/geo_origin/alt" type="double" value="408.0" />
-    <param name="/geo_origin/lat" type="double" value="47.3667" />
-    <param name="/geo_origin/lon" type="double" value="8.5500" />
+    <!-- <param name="/geo_origin/alt" type="double" value="408.0" /> -->
+    <!-- <param name="/geo_origin/lat" type="double" value="47.3667" /> -->
+    <!-- <param name="/geo_origin/lon" type="double" value="8.5500" /> -->
 
 
 
     <!-- Gazebo sim -->
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <include file="$(find px4)/launch/empty_world.launch">
         <arg name="gui" value="$(arg gui)"/>
         <arg name="world_name" value="$(arg world)"/>
         <arg name="debug" value="$(arg debug)"/>
@@ -44,9 +44,9 @@
         <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="2"/>
-            <arg name="y" value="0"/>
-            <arg name="z" value="1"/>
+            <arg name="x" value="-1"/>
+            <arg name="y" value="-1"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -56,7 +56,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
@@ -75,9 +75,9 @@
         <arg name="fcu_url" default="udp://:14541@localhost:14559"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="2"/>
-            <arg name="y" value="2"/>
-            <arg name="z" value="1"/>
+            <arg name="x" value="1"/>
+            <arg name="y" value="1"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -87,7 +87,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
