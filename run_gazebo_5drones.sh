@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source Tools/setup_gazebo.bash $(pwd) $(pwd)/build/posix_sitl_default
+export GAZEBO_PLUGIN_PATH=GAZEBO_PLUGIN_PATH:/home/steve/Project/DEV/catkin_ws/build_isolated/myriad_gazebo_plugin/
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd):$(pwd)/Tools/sitl_gazebo
 
 

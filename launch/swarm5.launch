@@ -4,27 +4,30 @@
     <!-- launches Gazebo environment and 2x: MAVROS, PX4 SITL, and spawns vehicle -->
     <!-- vehicle model and world -->
     <arg name="est" default="ekf2"/>
-    <arg name="vehicle" default="iris"/>
+    <arg name="vehicle" default="myriad"/>
     <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
     <!-- gazebo configs -->
-    <arg name="gui" default="true"/>
+    <arg name="gui" default="false"/>
     <arg name="debug" default="false"/>
-    <arg name="verbose" default="false"/>
+    <arg name="verbose" default="true"/>
     <arg name="paused" default="false"/>
+    <arg name="recording" default="false"/>
 
-
+    <param name ="/use_sim_time" value="true"/>
     <param name="/geo_origin/alt" type="double" value="47.0" />
     <param name="/geo_origin/lat" type="double" value="44.805261" />
     <param name="/geo_origin/lon" type="double" value="-0.605788" />
 
 
     <!-- Gazebo sim -->
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <include file="$(find px4)/launch/empty_world.launch">
         <arg name="gui" value="$(arg gui)"/>
         <arg name="world_name" value="$(arg world)"/>
         <arg name="debug" value="$(arg debug)"/>
         <arg name="verbose" value="$(arg verbose)"/>
         <arg name="paused" value="$(arg paused)"/>
+        <arg name="recording" value="$(arg recording)"/>
+
     </include>
     <!-- UAV1 -->
     <group ns="uav1">
@@ -33,9 +36,9 @@
         <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="0"/>
-            <arg name="y" value="2"/>
-            <arg name="z" value="0"/>
+            <arg name="x" value="1"/>
+            <arg name="y" value="0"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -45,7 +48,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
@@ -65,8 +68,8 @@
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
             <arg name="x" value="2"/>
-            <arg name="y" value="0"/>
-            <arg name="z" value="0"/>
+            <arg name="y" value="1"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -76,7 +79,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
@@ -91,6 +94,8 @@
     </group>
 
 
+
+
     <!-- UAV3 -->
     <group ns="uav3">
         <!-- MAVROS and vehicle configs -->
@@ -98,9 +103,9 @@
         <arg name="fcu_url" default="udp://:14542@localhost:14561"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="2"/>
+            <arg name="x" value="3"/>
             <arg name="y" value="2"/>
-            <arg name="z" value="0"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -110,7 +115,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
@@ -125,7 +130,6 @@
     </group>
 
 
-
     <!-- UAV4 -->
     <group ns="uav4">
         <!-- MAVROS and vehicle configs -->
@@ -133,9 +137,9 @@
         <arg name="fcu_url" default="udp://:14543@localhost:14563"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="4"/>
-            <arg name="y" value="2"/>
-            <arg name="z" value="0"/>
+            <arg name="x" value="1"/>
+            <arg name="y" value="3"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -145,7 +149,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
@@ -167,9 +171,9 @@
         <arg name="fcu_url" default="udp://:14544@localhost:14565"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="4"/>
+            <arg name="x" value="1"/>
             <arg name="y" value="4"/>
-            <arg name="z" value="0"/>
+            <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
@@ -179,7 +183,7 @@
             <arg name="ID" value="$(arg ID)"/>
         </include>
         <!-- MAVROS -->
-        <include file="$(find droneswarm_simu_gazebo)/launch/sitl/px4.launch">
+        <include file="$(find myriad)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
             <arg name="gcs_url" value=""/>
             <arg name="tgt_system" value="$(arg ID)"/>
@@ -192,6 +196,9 @@
 	<param name="/uav5/mavros/local_position/tf/child_frame_id" type="string" value="uav5" />
 
     </group>
+
+
+
 
 
 </launch>
