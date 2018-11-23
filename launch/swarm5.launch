@@ -137,7 +137,7 @@
         <arg name="fcu_url" default="udp://:14543@localhost:14563"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="1"/>
+            <arg name="x" value="4"/>
             <arg name="y" value="3"/>
             <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
@@ -171,7 +171,7 @@
         <arg name="fcu_url" default="udp://:14544@localhost:14565"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="1"/>
+            <arg name="x" value="5"/>
             <arg name="y" value="4"/>
             <arg name="z" value="0.5"/>
             <arg name="R" value="0"/>
